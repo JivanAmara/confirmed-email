@@ -4,15 +4,15 @@ Created on Feb 10, 2016
 @author: jivan
 '''
 import copy
-from django.core.mail.message import EmailMultiAlternatives, EmailMessage
-from confirmed_email.models import EmailAddress, QueuedEmailMessage
+from django.core.mail.message import EmailMultiAlternatives
+from confirmed_email.models import AddressConfirmation, QueuedEmailMessage
 import logging
 logger = logging.getLogger(__name__)
 
 class ConfirmedEmailMessage(EmailMultiAlternatives):
     def send(self, *args, **kwargs):
         destination_count = len(self.recipients())
-        confirmed = EmailAddress.objects.filter(
+        confirmed = AddressConfirmation.objects.filter(
                         address__in=self.recipients(),
                         confirmation_timestamp__isnull=False)
         confirmed_addresses = [ c.address for c in confirmed ]
@@ -43,7 +43,7 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         address = self.recipients()[0]
 
         # Add address to EmailAddresses
-        ea = EmailAddress.objects.get_or_create(address=address)
+        ea = AddressConfirmation.objects.get_or_create(address=address)
         # Queue message
         qem = QueuedEmailMessage.objects.create(email_address=ea, email_contents=self)
         if not qem:

@@ -14,19 +14,19 @@ from django.db import models
 from django.shortcuts import render
 
 
-class EmailAddresses(models.Model):
+class AddressConfirmation(models.Model):
     ''' Stores addresses with their confirmation status. '''
     address = models.EmailField()
     # unique string used as part of the confirmation link.
     uuid = models.CharField(max_length=32, default=uuid.uuid1)
     # This is None for unconfirmed addresses or the timestamp when the user clicked
     #    the confirmation link.
-    confirmation_timestamp = models.DateTimeField()
-    last_request_date = models.DateField()
-    request_count = models.IntegerField()
+    confirmation_timestamp = models.DateTimeField(null=True)
+    last_request_date = models.DateField(null=True)
+    request_count = models.IntegerField(default=0)
 
     def send_confirmation_request(self, from_address):
-        confirmation_link = reverse('confirmation_url', {'guid': self.guid})
+        confirmation_link = reverse('confirmed-email-confirmation-url', {'guid': self.guid})
         message_context = {'confirmation_link': confirmation_link}
         message_body = render('confirmed_email/email.txt', message_context)
         message_body = message_body.content()
@@ -38,9 +38,9 @@ class EmailAddresses(models.Model):
                           to=self.address)
 
 
-class EmailMessages(models.Model):
+class QueuedEmailMessage(models.Model):
     ''' Stores unsent email messages while waiting for confirmation.'''
-    email_address = models.ForeignKey(EmailAddresses)
+    address_confirmation = models.ForeignKey(AddressConfirmation)
     # Date when the message was queued while awaiting confirmation.
     date = models.DateField(auto_now=True)
     # ConfirmedEmailMessage instance serialized with json-pickle.

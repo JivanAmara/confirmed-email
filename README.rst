@@ -12,7 +12,7 @@ message.
 Messages for unconfirmed addresses will be queued until the address is confirmed
 or a timeout period defaulting to 3 days elapses.
 
-This package is configured with the same settings as EmailMultiAlternatives plus
+This app is configured with the same settings as EmailMultiAlternatives plus
 EMAIL_CONFIRMATION_WAIT which is an integer specifying the number of days to keep
 queued messages for an unconfirmed address before deleting them.  This setting
 defaults to 3.
