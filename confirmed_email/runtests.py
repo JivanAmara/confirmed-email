@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 import os
+import sys
+
 project_parent_dir = os.path.normpath(
     os.path.join(os.path.abspath(__file__), os.path.pardir, os.path.pardir)
 )
-# os.environ['DJANGO_SETTINGS_MODULE'] = 'confirmed_email.tests.settings_test'
-# os.environ['PYTHONPATH'] = project_parent_dir
-import sys
-# sys.path = (project_parent_dir,) + sys.path
-# print('sys.path: {}'.format(sys.path))
+sys.path = [project_parent_dir] + sys.path
+os.environ['DJANGO_SETTINGS_MODULE'] = 'confirmed_email.settings_test'
+
 import django
 from django.conf import settings
 from django.test import utils
