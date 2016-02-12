@@ -3,11 +3,7 @@ Created on Feb 11, 2016
 
 @author: jivan
 '''
-import sys
-print('sys.path: {}'.format(sys.path))
-import os
-print('DJANGO_SETTINGS_MODULE: {}'.format(os.environ['DJANGO_SETTINGS_MODULE']))
-
+from __future__ import unicode_literals
 from django.test import TestCase
 from confirmed_email.sender import ConfirmedEmailMessage
 from confirmed_email.models import QueuedEmailMessage, AddressConfirmation
@@ -24,6 +20,9 @@ class TestQueuedEmailMessages(TestCase):
         )
         qem = QueuedEmailMessage.objects.create(address_confirmation=ac)
         qem.email_contents = cem_before
+        qem.save()
         cem_after = QueuedEmailMessage.objects.get(address_confirmation=ac).email_contents
-
-        self.assertEqual(cem_after, cem_before)
+        msg = 'before:\n{}\n'.format(cem_before)
+        msg += '---\n'
+        msg += 'after:\n{}'.format(cem_after)
+        self.assertEqual(cem_after, cem_before, msg)

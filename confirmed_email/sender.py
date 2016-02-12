@@ -50,3 +50,13 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             logger.error('Unable to create QueuedEmailMessage to {}'.format(address))
         # Send confirmation email
         ea.send_confirmation_request(from_address=self.from_email)
+
+    def __eq__(self, other):
+        ret = self.__dict__ == other.__dict__
+        return ret
+
+    def __unicode__(self):
+        u = u''
+        for key, val in self.__dict__.items():
+            u += '{}: {}\n'.format(key, val)
+        return u

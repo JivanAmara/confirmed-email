@@ -46,7 +46,18 @@ class QueuedEmailMessage(models.Model):
     # ConfirmedEmailMessage instance serialized with json-pickle.
     _email_contents = models.TextField(db_column='email_contents', blank=True)
 
-    def set_email_contents(self, email_message):
+    @property
+    def email_contents(self):
+        # --- Decode & unpickle the message
+        pickle_input = base64.decodestring(self._email_contents)
+        # In-memory pickle input
+        pi = StringIO(pickle_input)
+        message = cPickle.load(pi)
+
+        return message
+
+    @email_contents.setter
+    def email_contents(self, email_message):
         # --- Pickle & encode the message for storage in a TextField.
         # In-memory pickle output.
         po = StringIO()
@@ -55,12 +66,3 @@ class QueuedEmailMessage(models.Model):
         po.close()
 
         self._email_contents = base64.encodestring(pickle_output)
-
-    def get_email_contents(self):
-        # --- Decode & unpickle the message
-        pickle_input = base64.decodestring(self._email_contents)
-        # In-memory pickle input
-        pi = StringIO(pickle_input)
-        message = cPickle.load(pi)
-
-        return message
