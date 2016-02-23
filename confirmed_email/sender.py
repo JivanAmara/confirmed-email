@@ -11,6 +11,18 @@ logger = logging.getLogger(__name__)
 
 class ConfirmedEmailMessage(EmailMultiAlternatives):
     def send(self, *args, **kwargs):
+        ''' | *brief*: Sends message, preceding it with a confirmation email or 
+            |    unconfirmed addresses.
+            | *author*: Jivan
+            | *created*: 2016-02-23
+            In the parent's send() the return value is the number of email messages
+            processed which would be 0 (for failure) or 1 (for success).
+
+            This class returns a dictionary with all recipient
+            addresses as keys and the text 'sent', 'queued', or 
+            'failed' as the value
+            for each key.
+        '''
         destination_count = len(self.recipients())
         confirmed = AddressConfirmation.objects.filter(
                         address__in=self.recipients(),
@@ -18,27 +30,39 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         confirmed_addresses = [ c.address for c in confirmed ]
         confirmed_count = len(confirmed_addresses)
 
+        send_results = {}
         # If all the destination addresses are confirmed, send as-is.
         if destination_count == confirmed_count:
-            ret = self.send()
+            if self.send():
+                send_results.update({ ca: 'sent' for ca in confirmed_addresses })
         else:
             # If any of the destination addresses are unconfirmed, send to
             #    each individually.
             for recipient in self.recipients():
                 cem = copy.deepcopy(self)
                 if recipient in confirmed_count:
-                    ret = cem.send()
+                    single_send_result = cem.send()
+                    send_results.update(single_send_result)
                 else:
                     cem.to = [recipient]
                     cem.cc = []
                     cem.bcc = []
-                    ret = cem.send_unconfirmed()
+                    if cem._send_unconfirmed():
+                        send_results.update({recipient: 'queued'})
+                    else:
+                        send_results.update({recipient: 'failed'})
 
-        return ret
+        return send_results
 
-    def send_unconfirmed(self):
+    def _send_unconfirmed(self):
+        ''' | *brief*: Queues this message for later delivery and sends a confirmation
+            |     message to the recipient.
+            | *note*: Only single-recipient messages are allowed.
+            *returns*: 0 if sending confirmation message failed, 1 if sending
+                confirmation message succeeded.
+        '''
         if len(self.recipients()) > 1:
-            msg = 'send_unconfirmed() should not be used directly.  Use send().'
+            msg = '_send_unconfirmed() should not be used directly.  Use send().'
             logger.error(msg)
         address = self.recipients()[0]
 
