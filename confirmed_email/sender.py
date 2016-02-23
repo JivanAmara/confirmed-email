@@ -52,8 +52,24 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         ea.send_confirmation_request(from_address=self.from_email)
 
     def __eq__(self, other):
-        ret = self.__dict__ == other.__dict__
-        return ret
+        # Assume equal
+        equal = True
+
+        # If the number of attachments differs, not equal
+        if len(self.attachments) != len(other.attachments):
+            equal = False
+
+        # If the properties differ, not equal
+        if equal and (self.__dict__ != other.__dict__):
+            equal = False
+
+        # If the attachments differ, not equal
+        if equal:
+            for at1, at2 in zip(self.attachments, other.attachments):
+                if at1 != at2:
+                    equal = False
+                    break
+        return equal
 
     def __unicode__(self):
         u = u''
