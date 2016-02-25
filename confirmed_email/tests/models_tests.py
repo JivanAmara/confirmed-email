@@ -13,7 +13,7 @@ from confirmed_email.models import QueuedEmailMessage, AddressConfirmation
 from confirmed_email.sender import ConfirmedEmailMessage
 
 
-class TestQueuedEmailMessages(TestCase):
+class QueuedEmailMessageTests(TestCase):
 
     def test_message_serialization(self):
         to_address = 'nobody@nowhere.com'
@@ -37,7 +37,7 @@ class TestQueuedEmailMessages(TestCase):
         ac = AddressConfirmation.objects.create(address=to_address)
 
         binary_dirpath = os.path.normpath(os.path.join(os.path.abspath(__file__), os.path.pardir))
-        binary_filepath = os.path.join(binary_dirpath, 'binary_file')
+        binary_filepath = os.path.join(binary_dirpath, 'binary_testing_file')
         with open(binary_filepath) as bf:
             attachment_data = bf.read()
         cem_before = ConfirmedEmailMessage(
@@ -54,3 +54,8 @@ class TestQueuedEmailMessages(TestCase):
         msg += '---\n'
         msg += 'after:\n{}'.format(cem_after)
         self.assertEqual(cem_after, cem_before, msg)
+
+
+class AddressConfirmationTests(TestCase):
+    def test_send_confirmation_request(self):
+        self.fail('test not implemented')

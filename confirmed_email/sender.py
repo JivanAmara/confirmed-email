@@ -40,7 +40,7 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             #    each individually.
             for recipient in self.recipients():
                 cem = copy.deepcopy(self)
-                if recipient in confirmed_count:
+                if recipient in confirmed_addresses:
                     single_send_result = cem.send()
                     send_results.update(single_send_result)
                 else:
@@ -67,13 +67,14 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         address = self.recipients()[0]
 
         # Add address to EmailAddresses
-        ea = AddressConfirmation.objects.get_or_create(address=address)
+        ac = AddressConfirmation.objects.get_or_create(address=address)
         # Queue message
-        qem = QueuedEmailMessage.objects.create(email_address=ea, email_contents=self)
+        qem = QueuedEmailMessage.objects.create(email_address=ac, email_contents=self)
         if not qem:
             logger.error('Unable to create QueuedEmailMessage to {}'.format(address))
         # Send confirmation email
-        ea.send_confirmation_request(from_address=self.from_email)
+        confirmation_message_sent = ac.send_confirmation_request(from_address=self.from_email)
+        return confirmation_message_sent
 
     def __eq__(self, other):
         # Assume equal

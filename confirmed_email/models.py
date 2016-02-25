@@ -32,10 +32,12 @@ class AddressConfirmation(models.Model):
         message_body = message_body.content()
 
         # Confirmation Email
-        ce = EmailMessage(subject='Please confirm your email address',
+        em = EmailMessage(subject='Please confirm your email address',
                           body=message_body,
                           from_email=from_address,
                           to=self.address)
+        ret = em.send()
+        return ret
 
 
 class QueuedEmailMessage(models.Model):
