@@ -33,7 +33,7 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         send_results = {}
         # If all the destination addresses are confirmed, send as-is.
         if destination_count == confirmed_count:
-            if self.send():
+            if super(ConfirmedEmailMessage, self).send():
                 send_results.update({ ca: 'sent' for ca in confirmed_addresses })
         else:
             # If any of the destination addresses are unconfirmed, send to
