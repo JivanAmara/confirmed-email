@@ -3,7 +3,7 @@ Confirmed Email Sender
 ======================
 
 This package provides a class "ConfirmedEmailMessage" derived from
-the django standard class EmailMultiAlternatives.
+the django standard class "EmailMultiAlternatives".
 
 This class sends email only to confirmed addresses and automatically sends confirmation
 messages to unconfirmed addresses.  It handles the confirmation process via a url in the
@@ -16,3 +16,11 @@ This app is configured with the same settings as EmailMultiAlternatives plus
 EMAIL_CONFIRMATION_WAIT which is an integer specifying the number of days to keep
 queued messages for an unconfirmed address before deleting them.  This setting
 defaults to 3.
+
+For developers, ConfirmedEmailMessage differs from EmailMultiAlternatives with
+the return value of ConfirmedEmailMessage.send().  Instead of EmailMultiAlternatives.send()
+return value of 0/1 to indicate failure/success there can be a different status for each
+destination address.   ConfirmedEmailMessage.send() returns, instead, a dictionary with
+each destination address as a key and a state represented a string; see the documentation
+for sender.ConfirmedEmailMessage'sent' for details.  This allows developers to
+display a message asking a user to confirm their email address if appropriate.
