@@ -24,3 +24,10 @@ destination address.   ConfirmedEmailMessage.send() returns, instead, a dictiona
 each destination address as a key and a state represented a string; see the documentation
 for sender.ConfirmedEmailMessage'sent' for details.  This allows developers to
 display a message asking a user to confirm their email address if appropriate.
+
+settings variables:
+EMAIL_CONFIRMATION_WAIT: Number of days to wait between sending confirmation emails.
+EMAIL_CONFIRMATION_TEMPLATE: Template to use as the body of confirmation emails.
+    It's important for this template to contain a link for the user to click on
+    passed to the template via variable {{confirmation_link}}.  See default template
+    'confirmed_email/confirmation_email.txt' for an example.

@@ -7,12 +7,18 @@ import base64
 import cPickle
 from cStringIO import StringIO
 import uuid
-
+from datetime import date
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import render
+from django.conf import settings
 
+# Collect the number of days between confirmation emails from settings.
+#    Default to 3 if it's not provided.
+EMAIL_CONFIRMATION_WAIT = settings.__dict__.get('EMAIL_CONFIRMATION_WAIT', 3)
+EMAIL_CONFIRMATION_TEMPLATE = \
+    settings.__dict__.get('EMAIL_CONFIRMATION_TEMPLATE', 'confirmed_email/confirmation_email.txt')
 
 class AddressConfirmation(models.Model):
     ''' Stores addresses with their confirmation status. '''
@@ -26,17 +32,36 @@ class AddressConfirmation(models.Model):
     request_count = models.IntegerField(default=0)
 
     def send_confirmation_request(self, from_address):
-        confirmation_link = reverse('confirmed-email-confirmation-url', {'guid': self.guid})
-        message_context = {'confirmation_link': confirmation_link}
-        message_body = render('confirmed_email/email.txt', message_context)
-        message_body = message_body.content()
+        ''' | *brief*: Sends an email requesting that *from_address* be confirmed.
+            | *author*: Jivan
+            | *created*: 2016-03-02
+            Sends an email if one hasn't been sent in more than EMAIL_CONFIRMATION_WAIT days.
+            Like EmailMessage, returns 0 for an email sending failure, 1 for sending success.
+            A value of 1 is also returned for a message skipped due to a previous message
+            sent within EMAIL_CONFIRMATION_WAIT days.
+        '''
+        if self.last_request_date is None:
+            days_since_request = None
+        else:
+            days_since_request = date.today() - self.last_request_date
 
-        # Confirmation Email
-        em = EmailMessage(subject='Please confirm your email address',
-                          body=message_body,
-                          from_email=from_address,
-                          to=self.address)
-        ret = em.send()
+        ret = 1
+        if days_since_request is None or days_since_request > EMAIL_CONFIRMATION_WAIT:
+            confirmation_link = reverse('confirmed-email-confirmation-url', {'guid': self.guid})
+            message_context = {'confirmation_link': confirmation_link}
+            message_body = render(EMAIL_CONFIRMATION_TEMPLATE, message_context)
+            message_body = message_body.content()
+
+            # Confirmation Email
+            em = EmailMessage(subject='Please confirm your email address',
+                              body=message_body,
+                              from_email=from_address,
+                              to=self.address)
+            ret = em.send()
+            if ret:
+                self.last_request_date = date.today()
+                self.save()
+
         return ret
 
 
