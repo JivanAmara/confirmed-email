@@ -40,13 +40,13 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             #    each individually.
             for recipient in self.recipients():
                 cem = copy.deepcopy(self)
+                cem.to = [recipient]
+                cem.cc = []
+                cem.bcc = []
                 if recipient in confirmed_addresses:
                     single_send_result = cem.send()
                     send_results.update(single_send_result)
                 else:
-                    cem.to = [recipient]
-                    cem.cc = []
-                    cem.bcc = []
                     if cem._send_unconfirmed():
                         send_results.update({recipient: 'queued'})
                     else:

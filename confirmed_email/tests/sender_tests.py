@@ -3,12 +3,15 @@ Created on Feb 25, 2016
 
 @author: jivan
 '''
-from datetime import datetime
+from datetime import datetime, timedelta
+
+from django.core.mail.message import EmailMultiAlternatives, EmailMessage
 from django.test import TestCase
 import mock
+
 from confirmed_email.models import AddressConfirmation
 from confirmed_email.sender import ConfirmedEmailMessage
-from django.core.mail.message import EmailMultiAlternatives
+
 
 class ConfirmedEmailMessageTests(TestCase):
 
@@ -61,11 +64,43 @@ class ConfirmedEmailMessageTests(TestCase):
         self.assertEqual(send_results, expected_results)
         mock_send_unconfirmed.assert_not_called()
 
-    def test_send_combination(self):
+
+    @mock.patch.object(EmailMessage, 'send')
+    def test_send_combination(self, mock_em_send):
         ''' | *brief*: Check that a message sent to a combination of known & unknown addresses
             |    returns a dictionary with appropriate statuses for each address.
         '''
-        self.fail('Test not implemented')
+        mock_em_send.return_value = 1
+        known_addresses = [
+            'k1@nowhere.com',  # Not yet confirmed
+            'k2@nowhere.com',  # Confirmed
+        ]
+        # Make records to indicate the known addresses are known.
+        yesterday = datetime.today() - timedelta(days=1)
+        AddressConfirmation.objects.create(address=known_addresses[0], last_request_date=yesterday)
+        AddressConfirmation.objects.create(address=known_addresses[1], confirmation_timestamp=yesterday)
 
-    def test_send_unconfirmed(self):
-        self.fail('Test not implemented')
+        unknown_addresses = [
+            'u1@nowhere.com',  # Address currently unknown
+            'u2@nowhere.com',  # Address currently unknown
+        ]
+        sender_address = 'from@nowhere.com'
+
+        recipient_addresses = known_addresses + unknown_addresses
+        cem = ConfirmedEmailMessage(
+            subject='Subject', body='message_body', from_email=sender_address,
+            to=recipient_addresses
+        )
+        send_results = cem.send()
+
+        # One call for each of the confirmation emails sent for unkown_addresses
+        #    plus one call for the email sent to the confirmed address.
+        self.assertEqual(mock_em_send.call_count, 3)
+        self.assertEqual(set(send_results.keys()), set(known_addresses + unknown_addresses))
+        expected_results = {
+                'k1@nowhere.com': 'queued',
+                'k2@nowhere.com': 'sent',
+                'u1@nowhere.com': 'queued',
+                'u2@nowhere.com': 'queued',
+        }
+        self.assertEqual(send_results, expected_results)
