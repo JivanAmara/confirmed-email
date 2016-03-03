@@ -8,7 +8,7 @@ DATABASES = {
     }
 }
 
-ROOT_URLCONF = 'confirmed_email.urls',
+ROOT_URLCONF = 'confirmed_email.urls'
 
 INSTALLED_APPS = (
     'django.contrib.auth',

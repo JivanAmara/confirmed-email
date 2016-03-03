@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.template.context import RequestContext
 from django.views.generic import TemplateView
 
-from confirmed_email.models import EmailAddresses, EmailMessages
+from confirmed_email.models import AddressConfirmation, QueuedEmailMessage
 
 
 logger = logging.getLogger(__name__)
@@ -20,7 +20,7 @@ class HandleConfirmationClick(TemplateView):
     template_name = 'confirmed_email/address_confirmed.html'
     def get(self, request, uuid):
         # Mark the email associated with uuid as confirmed.
-        ea = EmailAddresses.objects.get(uuid=uuid)
+        ea = AddressConfirmation.objects.get(uuid=uuid)
         ea.confirmation_timestamp = datetime.now()
         # Send any emails to this address which are waiting.
         send_queued_emails(ea)
@@ -35,7 +35,7 @@ class HandleConfirmationClick(TemplateView):
 def send_queued_emails(email_address):
     if email_address.confirmation_timestamp:
         # queued emails
-        qes = EmailMessages.objects.filter(email_address=email_address)
+        qes = QueuedEmailMessage.objects.filter(email_address=email_address)
         for qe in qes:
             qe.send()
     else:

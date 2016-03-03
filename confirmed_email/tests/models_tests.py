@@ -5,7 +5,7 @@ Created on Feb 11, 2016
 '''
 from __future__ import unicode_literals
 
-from datetime import date
+from datetime import date, timedelta
 import os
 
 from django.core.mail.message import EmailMessage
@@ -65,40 +65,37 @@ class AddressConfirmationTests(TestCase):
         emailmessage_send.return_value = 1
         # Send to unknown address.  Should send successfully.
         to_address = 'nobody@nowhere.com'
-        cem = ConfirmedEmailMessage(
-            to=[to_address], from_email='noone@nowhere.com', subject='Test Email',
-            body='This is the message body.'
-        )
-        result = cem.send()
+        from_address = 'from@nowhere.com'
+        cem = AddressConfirmation.objects.create(address=to_address)
+        result = cem.send_confirmation_request(from_address)
         self.assertEqual(result, 1)
-        self.assertEqual(emailmessage_send.called, 1)
+        self.assertEqual(emailmessage_send.call_count, 1)
 
-    @mock.patch.object(AddressConfirmation, 'last_request_date')
     @mock.patch.object(EmailMessage, 'send')
-    def test_send_confirmation_request_too_soon(self, emailmessage_send, ac_lrd):
+    def test_send_2nd_confirmation_request(self, emailmessage_send):
         emailmessage_send.return_value = 1
-        ac_lrd.value = date.today() - 1
-        # Send to known address sent to yesterday.  Should skip sending but return success.
+        # Send confirmation to address which had a confirmation sent yesterday.
+        #    Should skip sending but return as successfully sent.
         to_address = 'nobody@nowhere.com'
-        cem = ConfirmedEmailMessage(
-            to=[to_address], from_email='noone@nowhere.com', subject='Test Email',
-            body='This is the message body.'
-        )
-        result = cem.send()
+        from_address = 'from@nowhere.com'
+        cem = AddressConfirmation.objects.create(
+                  address=to_address, last_request_date=date.today() - timedelta(days=1))
+        result = cem.send_confirmation_request(from_address)
         self.assertEqual(result, 1)
-        self.assertEqual(emailmessage_send.called, 0)
+        self.assertEqual(emailmessage_send.call_count, 0)
 
-    @mock.patch.object(AddressConfirmation, 'last_request_date')
     @mock.patch.object(EmailMessage, 'send')
-    def test_send_2nd_confirmation_request(self, emailmessage_send, ac_lrd):
-        # Send to known address sent more than EMAIL_CONFIRMATION_WAIT days ago.
-        #    Should send successfully.
-        ac_lrd.value = date.today() - EMAIL_CONFIRMATION_WAIT - 1
+    def test_send_3rd_confirmation_request(self, emailmessage_send):
+        emailmessage_send.return_value = 1
+        # Send confirmation to address which had a confirmation sent more than
+        #    EMAIL_CONFIRMATION_WAIT days ago.
+        # Should send successfully.
         to_address = 'nobody@nowhere.com'
-        cem = ConfirmedEmailMessage(
-            to=[to_address], from_email='noone@nowhere.com', subject='Test Email',
-            body='This is the message body.'
-        )
-        result = cem.send()
+        from_address = 'from@nowhere.com'
+        # EMAIL_CONFIRMATION_WAIT plus 1
+        ecwp1 = EMAIL_CONFIRMATION_WAIT + 1
+        cem = AddressConfirmation.objects.create(
+                  address=to_address, last_request_date=date.today() - timedelta(days=ecwp1))
+        result = cem.send_confirmation_request(from_address)
         self.assertEqual(result, 1)
-        self.assertEqual(emailmessage_send.called, 1)
+        self.assertEqual(emailmessage_send.call_count, 1)

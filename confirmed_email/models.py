@@ -6,13 +6,16 @@ Created on Feb 10, 2016
 import base64
 import cPickle
 from cStringIO import StringIO
-import uuid
 from datetime import date
+import uuid
+
+from django.conf import settings
 from django.core.mail.message import EmailMessage
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import render
-from django.conf import settings
+from django.template.loader import render_to_string
+
 
 # Collect the number of days between confirmation emails from settings.
 #    Default to 3 if it's not provided.
@@ -43,21 +46,21 @@ class AddressConfirmation(models.Model):
         if self.last_request_date is None:
             days_since_request = None
         else:
-            days_since_request = date.today() - self.last_request_date
+            delta = date.today() - self.last_request_date
+            days_since_request = delta.days
 
         ret = 1
         if days_since_request is None or days_since_request > EMAIL_CONFIRMATION_WAIT:
             confirmation_link = \
                 reverse('confirmed-email-confirmation-url', kwargs={'uuid': self.uuid})
             message_context = {'confirmation_link': confirmation_link}
-            message_body = render(EMAIL_CONFIRMATION_TEMPLATE, message_context)
-            message_body = message_body.content()
+            message_body = render_to_string(EMAIL_CONFIRMATION_TEMPLATE, message_context)
 
             # Confirmation Email
             em = EmailMessage(subject='Please confirm your email address',
                               body=message_body,
                               from_email=from_address,
-                              to=self.address)
+                              to=[self.address])
             ret = em.send()
             if ret:
                 self.last_request_date = date.today()

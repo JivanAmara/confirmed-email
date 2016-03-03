@@ -1,2 +1,3 @@
-from confirmed_email.tests.models_tests import QueuedEmailMessageTests , AddressConfirmationTests
+from confirmed_email.tests.models_tests import QueuedEmailMessageTests
+from confirmed_email.tests.models_tests import AddressConfirmationTests
 from confirmed_email.tests.sender_tests import ConfirmedEmailMessageTests
