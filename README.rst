@@ -34,3 +34,7 @@ EMAIL_CONFIRMATION_TEMPLATE: Template to use as the body of confirmation emails.
     It's important for this template to contain a link for the user to click on
     passed to the template via variable {{confirmation_link}}.  See default template
     'confirmed_email/confirmation_email.txt' for an example.
+
+ADDRESS_CONFIRMED_TEMPLATE: Template displayed to a user when they click on a confirmation link.
+    Defaults to 'confirmed_email/address_confirmed.html' and has template variable
+    {{email_address}} passed to it.
