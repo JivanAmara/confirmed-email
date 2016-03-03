@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class ConfirmedEmailMessage(EmailMultiAlternatives):
     def send(self, *args, **kwargs):
-        ''' | *brief*: Sends message, preceding it with a confirmation email or 
+        ''' | *brief*: Sends message, preceding it with a confirmation email or
             |    unconfirmed addresses.
             | *author*: Jivan
             | *created*: 2016-02-23
@@ -19,7 +19,7 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             processed which would be 0 (for failure) or 1 (for success).
 
             This class returns a dictionary with all recipient
-            addresses as keys and the text 'sent', 'queued', or 
+            addresses as keys and the text 'sent', 'queued', or
             'failed' as the value
             for each key.
         '''
@@ -67,9 +67,9 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         address = self.recipients()[0]
 
         # Add address to EmailAddresses
-        ac = AddressConfirmation.objects.get_or_create(address=address)
+        ac = AddressConfirmation.objects.get_or_create(address=address)[0]
         # Queue message
-        qem = QueuedEmailMessage.objects.create(email_address=ac, email_contents=self)
+        qem = QueuedEmailMessage.objects.create(address_confirmation=ac, email_contents=self)
         if not qem:
             logger.error('Unable to create QueuedEmailMessage to {}'.format(address))
         # Send confirmation email

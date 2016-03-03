@@ -47,7 +47,8 @@ class AddressConfirmation(models.Model):
 
         ret = 1
         if days_since_request is None or days_since_request > EMAIL_CONFIRMATION_WAIT:
-            confirmation_link = reverse('confirmed-email-confirmation-url', {'guid': self.guid})
+            confirmation_link = \
+                reverse('confirmed-email-confirmation-url', kwargs={'uuid': self.uuid})
             message_context = {'confirmation_link': confirmation_link}
             message_body = render(EMAIL_CONFIRMATION_TEMPLATE, message_context)
             message_body = message_body.content()

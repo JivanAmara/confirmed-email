@@ -7,7 +7,7 @@ from django.conf.urls import url, patterns
 from confirmed_email.views import HandleConfirmationClick
 
 urlpatterns = patterns('',
-    url('^confirm-email-address/(?P<uuid>.*?)$', HandleConfirmationClick.as_view(),
+    url(r'^confirm-email-address/(?P<uuid>.*?)$', HandleConfirmationClick.as_view(),
         name='confirmed-email-confirmation-url'
     ),
 )
