@@ -38,3 +38,19 @@ EMAIL_CONFIRMATION_TEMPLATE: Template to use as the body of confirmation emails.
 ADDRESS_CONFIRMED_TEMPLATE: Template displayed to a user when they click on a confirmation link.
     Defaults to 'confirmed_email/address_confirmed.html' and has template variable
     {{email_address}} passed to it.
+
+Example (view) useage:
+
+    destination_address = 'noone@nowhere.com'
+    cem = ConfirmedEmailAddress(
+        subject='No Subject Needed',
+        body='Hi there.',
+        from_email='someservice@nowhere.com',
+        to=[destination_address],
+    )
+
+    send_results = cem.send()
+    if send_results[destination_address] == 'queued':
+        template = 'confirmed_email/confirmation_required.html'
+        context = {'email_address': destination_address}
+        return render(request, template, context)
