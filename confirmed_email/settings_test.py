@@ -1,3 +1,4 @@
+import os
 SECRET_KEY = 'NOT_REALLY_IMPORTANT_FOR_TESTING',
 DEBUG = True,
 

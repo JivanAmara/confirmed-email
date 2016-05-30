@@ -26,13 +26,14 @@ class HandleConfirmationClick(TemplateView):
         # Mark the email associated with uuid as confirmed.
         ac = AddressConfirmation.objects.get(uuid=uuid)
         ac.confirmation_timestamp = datetime.now()
+        ac.save()
         # Send any emails to this address which are waiting.
         send_queued_emails(ac)
 
         # Provide a page to thank the user for confirming.
         rc = RequestContext(request)
         rc.update({'email_address': ac.address})
-        resp = render(self.template_name, context=rc)
+        resp = render(request, self.template_name, rc)
         return resp
 
 

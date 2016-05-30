@@ -2,28 +2,33 @@
 Confirmed Email Sender
 ======================
 
-This package provides a class "ConfirmedEmailMessage" derived from
-the django standard class "EmailMultiAlternatives".
+This package provides a drop-in replacements for shortcut send_mail() and class 
+"EmailMultiAlternatives" which ensures that destination addresses are confirmed
+before sending email to them.
 
-This class sends email only to confirmed addresses and automatically sends confirmation
-messages to unconfirmed addresses.  It handles the confirmation process via a url in the
-message.
+The shortcut "send_mail_confirmed()" and class "ConfirmedEmailMessage" send email only
+to confirmed addresses and automatically send confirmation messages to unconfirmed addresses.
+It handles the confirmation process via a url in the message.
 
 Messages for unconfirmed addresses will be queued until the address is confirmed
 or a timeout period defaulting to 3 days elapses.
 
-This app is configured with the same settings as EmailMultiAlternatives plus
+This app is configured with the same settings as Django's email backend plus
 EMAIL_CONFIRMATION_WAIT which is an integer specifying the number of days to keep
 queued messages for an unconfirmed address before deleting them.  This setting
-defaults to 3.
+defaults to 3.  You also need a valid domain name for Django's Sites framework
+so the confirmation link is at the correct host.
 
-For developers, ConfirmedEmailMessage differs from EmailMultiAlternatives with
-the return value of ConfirmedEmailMessage.send().  Instead of EmailMultiAlternatives.send()
+If you're unfamiliar with the Sites framework, you just need to make a quick update
+to the table django_site.  It will be self-explanatory when you take a look.
+
+ConfirmedEmailMessage and send_email_confirmed differ from EmailMultiAlternatives in
+the return value of ConfirmedEmailMessage.send().  Instead of the EmailMultiAlternatives.send()
 return value of 0/1 to indicate failure/success there can be a different status for each
-destination address.   ConfirmedEmailMessage.send() returns, instead, a dictionary with
-each destination address as a key and a state represented a string; see the documentation
-for sender.ConfirmedEmailMessage'sent' for details.  This allows developers to
-display a message asking a user to confirm their email address if appropriate.
+destination address.   These return instead, a dictionary with
+each destination address as a key and a state represented by a string; see the documentation
+for sender.ConfirmedEmailMessage.sent() for details.  This allows you to
+display a message indicating that confirmation is necessary if appropriate.
 
 settings variables:
 
@@ -39,10 +44,10 @@ ADDRESS_CONFIRMED_TEMPLATE: Template displayed to a user when they click on a co
     Defaults to 'confirmed_email/address_confirmed.html' and has template variable
     {{email_address}} passed to it.
 
-Example (view) useage:
+Example (view) usage:
 
     destination_address = 'noone@nowhere.com'
-    cem = ConfirmedEmailAddress(
+    cem = ConfirmedEmailMessage(
         subject='No Subject Needed',
         body='Hi there.',
         from_email='someservice@nowhere.com',

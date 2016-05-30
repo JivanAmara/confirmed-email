@@ -9,6 +9,17 @@ from confirmed_email.models import AddressConfirmation, QueuedEmailMessage
 import logging
 logger = logging.getLogger(__name__)
 
+def send_mail_confirmed(subject, message, from_email, recipient_list, subject, message,
+        from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
+        connection=None, html_message=None
+    ):
+    from django.core.mail import get_connection
+    connection = connection or get_connection(username=auth_user,
+                                    password=auth_password,
+                                    fail_silently=fail_silently)
+    return ConfirmedEmailMessage(subject, message, from_email, recipient_list,
+                        connection=connection).send()
+
 class ConfirmedEmailMessage(EmailMultiAlternatives):
     def send(self, *args, **kwargs):
         ''' | *brief*: Sends message, preceding it with a confirmation email or
@@ -47,7 +58,9 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
                     single_send_result = cem.send()
                     send_results.update(single_send_result)
                 else:
-                    if cem._send_unconfirmed():
+                    # sending_results is the number of messages sent.
+                    sending_result = cem._send_unconfirmed()
+                    if sending_result:
                         send_results.update({recipient: 'queued'})
                     else:
                         send_results.update({recipient: 'failed'})
@@ -73,8 +86,8 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         if not qem:
             logger.error('Unable to create QueuedEmailMessage to {}'.format(address))
         # Send confirmation email
-        confirmation_message_sent = ac.send_confirmation_request(from_address=self.from_email)
-        return confirmation_message_sent
+        confirmation_message_error = ac.send_confirmation_request(from_address=self.from_email)
+        return confirmation_message_error
 
     def __eq__(self, other):
         # Assume equal

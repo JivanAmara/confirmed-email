@@ -10,7 +10,8 @@ from datetime import date
 import uuid
 
 from django.conf import settings
-from django.core.mail.message import EmailMessage
+from django.contrib.sites.models import Site
+from django.core.mail.message import EmailMultiAlternatives
 from django.core.urlresolvers import reverse
 from django.db import models
 from django.shortcuts import render
@@ -20,8 +21,10 @@ from django.template.loader import render_to_string
 # Collect the number of days between confirmation emails from settings.
 #    Default to 3 if it's not provided.
 EMAIL_CONFIRMATION_WAIT = settings.__dict__.get('EMAIL_CONFIRMATION_WAIT', 3)
-EMAIL_CONFIRMATION_TEMPLATE = \
-    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE', 'confirmed_email/confirmation_email.txt')
+EMAIL_CONFIRMATION_TEMPLATE_TXT = \
+    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_TXT', 'confirmed_email/confirmation_email.txt')
+EMAIL_CONFIRMATION_TEMPLATE_HTML = \
+    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_HTML', 'confirmed_email/confirmation_email.html')
 
 class AddressConfirmation(models.Model):
     ''' Stores addresses with their confirmation status. '''
@@ -51,16 +54,22 @@ class AddressConfirmation(models.Model):
 
         ret = 1
         if days_since_request is None or days_since_request > EMAIL_CONFIRMATION_WAIT:
-            confirmation_link = \
+            current_domain = Site.objects.get_current().domain
+
+            confirmation_location = \
                 reverse('confirmed-email-confirmation-url', kwargs={'uuid': self.uuid})
+            confirmation_link = 'http://' + current_domain + confirmation_location
             message_context = {'confirmation_link': confirmation_link}
-            message_body = render_to_string(EMAIL_CONFIRMATION_TEMPLATE, message_context)
+            message_body_text = render_to_string(EMAIL_CONFIRMATION_TEMPLATE_TXT, message_context)
+            message_body_html = render_to_string(EMAIL_CONFIRMATION_TEMPLATE_HTML, message_context)
 
             # Confirmation Email
-            em = EmailMessage(subject='Please confirm your email address',
-                              body=message_body,
+            em = EmailMultiAlternatives(subject='Please confirm your email address',
+                              body=message_body_text,
                               from_email=from_address,
                               to=[self.address])
+            em.attach_alternative(message_body_html, "text/html")
+
             ret = em.send()
             if ret:
                 self.last_request_date = date.today()
@@ -97,3 +106,7 @@ class QueuedEmailMessage(models.Model):
         po.close()
 
         self._email_contents = base64.encodestring(pickle_output)
+
+    def send(self):
+        res = self.email_contents.send()
+        return res
