@@ -18,7 +18,7 @@ setup(
     author_email='Development@JivanAmara.net',
     url='https://github.com/JivanAmara/confirmed-email',
     name='django-confirmed-email',
-    version='0.0.4',
+    version='0.0.5',
     packages=['confirmed_email'],
     package_data={'confirmed_email': confirmed_email_data},
     description='Provides an email sender that automatically confirms addresses.',
