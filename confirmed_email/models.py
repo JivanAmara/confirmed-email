@@ -4,8 +4,16 @@ Created on Feb 10, 2016
 @author: jivan
 '''
 import base64
-import cPickle
-from cStringIO import StringIO
+# These try/except blocks allow for python 2/3 compatibility
+try:
+    import cPickle as pickle
+except:
+    import pickle
+try:
+    from cStringIO import StringIO as memfile
+except:
+    from io import BytesIO as memfile
+
 from datetime import date
 import uuid
 
@@ -89,10 +97,10 @@ class QueuedEmailMessage(models.Model):
     @property
     def email_contents(self):
         # --- Decode & unpickle the message
-        pickle_input = base64.decodestring(self._email_contents)
+        pickle_input = base64.b64decode(self._email_contents)
         # In-memory pickle input
-        pi = StringIO(pickle_input)
-        message = cPickle.load(pi)
+        pi = memfile(pickle_input)
+        message = pickle.load(pi)
 
         return message
 
@@ -100,8 +108,8 @@ class QueuedEmailMessage(models.Model):
     def email_contents(self, email_message):
         # --- Pickle & encode the message for storage in a TextField.
         # In-memory pickle output.
-        po = StringIO()
-        cPickle.dump(email_message, po)
+        po = memfile()
+        pickle.dump(email_message, po)
         pickle_output = po.getvalue()
         po.close()
 

@@ -24,8 +24,9 @@ setup(
     description='Provides an email sender that automatically confirms addresses.',
     long_description=README,
     classifiers=[
-        'Programming Language :: Python',
-        'Framework :: Django',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.4',
+        'Framework :: Django :: 1.5',
         'License :: OSI Approved :: MIT License',
     ]
 )

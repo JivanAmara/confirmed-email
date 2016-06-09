@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 from datetime import date, timedelta
 import os
 
+from django.contrib.sites.models import Site
 from django.core.mail.message import EmailMessage
 from django.test import TestCase
 import mock
@@ -41,7 +42,7 @@ class QueuedEmailMessageTests(TestCase):
 
         binary_dirpath = os.path.normpath(os.path.join(os.path.abspath(__file__), os.path.pardir))
         binary_filepath = os.path.join(binary_dirpath, 'binary_testing_file')
-        with open(binary_filepath) as bf:
+        with open(binary_filepath, 'rb') as bf:
             attachment_data = bf.read()
         cem_before = ConfirmedEmailMessage(
             to=[to_address], from_email='noone@nowhere.com', subject='Test Email',
@@ -86,6 +87,7 @@ class AddressConfirmationTests(TestCase):
 
     @mock.patch.object(EmailMessage, 'send')
     def test_send_3rd_confirmation_request(self, emailmessage_send):
+        print(Site.objects.count())
         emailmessage_send.return_value = 1
         # Send confirmation to address which had a confirmation sent more than
         #    EMAIL_CONFIRMATION_WAIT days ago.

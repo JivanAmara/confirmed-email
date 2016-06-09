@@ -102,8 +102,13 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             equal = False
 
         # If the properties differ, not equal
-        if equal and (self.__dict__ != other.__dict__):
-            equal = False
+        if equal:
+            for key in self.__dict__.keys():
+                # Connections aren't serialized & don't change the message
+                if key == 'connection': continue
+                if self.__dict__[key] != other.__dict__[key]:
+                    equal = False
+                    break
 
         # If the attachments differ, not equal
         if equal:

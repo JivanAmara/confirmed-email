@@ -2,6 +2,8 @@ import os
 SECRET_KEY = 'NOT_REALLY_IMPORTANT_FOR_TESTING',
 DEBUG = True,
 
+SITE_ID = 1
+
 DATABASES = {
     'default': {
         'NAME': 'confirmed-email.sqlite3',
@@ -16,5 +18,6 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.admin',
+    'django.contrib.sites',
     'confirmed_email',
 )
