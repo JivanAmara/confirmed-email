@@ -38,10 +38,10 @@ EMAIL_CONFIRMATION_WAIT: Number of days to wait between sending confirmation ema
 EMAIL_CONFIRMATION_TEMPLATE: Template to use as the body of confirmation emails.
     It's important for this template to contain a link for the user to click on
     passed to the template via variable {{confirmation_link}}.  See default template
-    'confirmed_email/confirmation_email.txt' for an example.
+    'confirmation_email.txt' for an example.
 
 ADDRESS_CONFIRMED_TEMPLATE: Template displayed to a user when they click on a confirmation link.
-    Defaults to 'confirmed_email/address_confirmed.html' and has template variable
+    Defaults to 'address_confirmed.html' and has template variable
     {{email_address}} passed to it.
 
 Example (view) usage:
@@ -56,6 +56,6 @@ Example (view) usage:
 
     send_results = cem.send()
     if send_results[destination_address] == 'queued':
-        template = 'confirmed_email/confirmation_required.html'
+        template = 'confirmation_required.html'
         context = {'email_address': destination_address}
         return render(request, template, context)

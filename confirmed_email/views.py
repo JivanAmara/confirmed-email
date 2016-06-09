@@ -14,7 +14,7 @@ from confirmed_email.models import AddressConfirmation, QueuedEmailMessage
 from django.conf import settings
 
 ADDRESS_CONFIRMED_TEMPLATE = \
-    getattr(settings, 'ADDRESS_CONFIRMED_TEMPLATE', 'confirmed_email/address_confirmed.html')
+    getattr(settings, 'ADDRESS_CONFIRMED_TEMPLATE', 'address_confirmed.html')
 
 
 logger = logging.getLogger(__name__)

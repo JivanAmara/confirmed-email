@@ -30,9 +30,9 @@ from django.template.loader import render_to_string
 #    Default to 3 if it's not provided.
 EMAIL_CONFIRMATION_WAIT = settings.__dict__.get('EMAIL_CONFIRMATION_WAIT', 3)
 EMAIL_CONFIRMATION_TEMPLATE_TXT = \
-    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_TXT', 'confirmed_email/confirmation_email.txt')
+    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_TXT', 'confirmation_email.txt')
 EMAIL_CONFIRMATION_TEMPLATE_HTML = \
-    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_HTML', 'confirmed_email/confirmation_email.html')
+    getattr(settings, 'EMAIL_CONFIRMATION_TEMPLATE_HTML', 'confirmation_email.html')
 
 class AddressConfirmation(models.Model):
     ''' Stores addresses with their confirmation status. '''

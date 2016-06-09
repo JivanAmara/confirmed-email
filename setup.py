@@ -8,9 +8,9 @@ with open('README.rst') as rm:
     README = rm.read()
 
 confirmed_email_data = [
-    'templates/confirmed_email/address_confirmed.html',
-    'templates/confirmed_email/confirmation_email.txt',
-    'templates/confirmed_email/confirmation_required.html'
+    'templates/address_confirmed.html',
+    'templates/confirmation_email.txt',
+    'templates/confirmation_required.html'
 ]
 
 setup(
