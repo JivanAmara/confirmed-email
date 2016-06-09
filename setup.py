@@ -23,4 +23,9 @@ setup(
     package_data={'confirmed_email': confirmed_email_data},
     description='Provides an email sender that automatically confirms addresses.',
     long_description=README,
+    classifiers=[
+        'Programming Language :: Python',
+        'Framework :: Django',
+        'License :: OSI Approved :: MIT License',
+    ]
 )
