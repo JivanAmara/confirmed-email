@@ -8,7 +8,7 @@ before sending email to them.
 
 The shortcut "send_mail_confirmed()" and class "ConfirmedEmailMessage" send email only
 to confirmed addresses and automatically send confirmation messages to unconfirmed addresses.
-It handles the confirmation process via a url in the message.
+It handles the confirmation process via a url in the confirmation message.
 
 Messages for unconfirmed addresses will be queued until the address is confirmed
 or a timeout period defaulting to 3 days elapses.
@@ -19,16 +19,16 @@ queued messages for an unconfirmed address before deleting them.  This setting
 defaults to 3.  You also need a valid domain name for Django's Sites framework
 so the confirmation link is at the correct host.
 
-If you're unfamiliar with the Sites framework, you just need to make a quick update
-to the table django_site.  It will be self-explanatory when you take a look.
+If you're unfamiliar with the Sites framework, look for 'Sites' in the Django admin,
+it should be self-explanatory.
 
-ConfirmedEmailMessage and send_email_confirmed differ from EmailMultiAlternatives in
-the return value of ConfirmedEmailMessage.send().  Instead of the EmailMultiAlternatives.send()
-return value of 0/1 to indicate failure/success there can be a different status for each
-destination address.   These return instead, a dictionary with
-each destination address as a key and a state represented by a string; see the documentation
-for sender.ConfirmedEmailMessage.sent() for details.  This allows you to
-display a message indicating that confirmation is necessary if appropriate.
+ConfirmedEmailMessage.send() and send_email_confirmed() differ from the originals in
+their return values.  Instead of a return value of 0/1 to indicate failure/success there
+can be a different status for each destination address.   These return instead a dictionary with
+each destination address as a key and a state indicating
+success/failure/queued pending confirmation; see the documentation for
+sender.ConfirmedEmailMessage.sent() for details.
+This allows you to display a message indicating that confirmation is necessary if appropriate.
 
 settings variables:
 
