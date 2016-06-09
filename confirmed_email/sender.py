@@ -9,8 +9,8 @@ from confirmed_email.models import AddressConfirmation, QueuedEmailMessage
 import logging
 logger = logging.getLogger(__name__)
 
-def send_mail_confirmed(subject, message, from_email, recipient_list, subject, message,
-        from_email, recipient_list, fail_silently=False, auth_user=None, auth_password=None,
+def send_mail_confirmed(subject, message, from_email, recipient_list,
+        fail_silently=False, auth_user=None, auth_password=None,
         connection=None, html_message=None
     ):
     from django.core.mail import get_connection
@@ -50,7 +50,11 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
             # If any of the destination addresses are unconfirmed, send to
             #    each individually.
             for recipient in self.recipients():
-                cem = copy.deepcopy(self)
+                cem = ConfirmedEmailMessage(
+                    self.subject, self.body, self.from_email,
+                    connection=self.connection, attachments=self.attachments,
+                    headers=self.extra_headers, alternatives=self.alternatives
+                )
                 cem.to = [recipient]
                 cem.cc = []
                 cem.bcc = []
@@ -114,3 +118,12 @@ class ConfirmedEmailMessage(EmailMultiAlternatives):
         for key, val in self.__dict__.items():
             u += '{}: {}\n'.format(key, val)
         return u
+
+    def __getstate__(self):
+        d = dict(self.__dict__)
+        del d['connection']
+        return d
+
+    def __setstate__(self, d):
+        self.__dict__.update(d)
+        self.connection = False
